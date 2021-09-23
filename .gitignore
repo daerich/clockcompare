@@ -1,0 +1,4 @@
+hwcomp
+!hwcomp.c
+*.swp
+core.*
