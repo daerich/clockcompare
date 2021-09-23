@@ -1,4 +1,7 @@
+Makefile
+!Makefile.in
 hwcomp
 !hwcomp.c
 *.swp
+*.o
 core.*

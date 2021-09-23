@@ -1,0 +1,83 @@
+#!/bin/bash
+
+HEADERS="errno stdio stdlib stdbool linux/rtc
+	sys/ioctl fcntl time unistd"
+
+CC=
+determine_cc(){
+	if [[ -n $1 ]];then
+
+		if type -p $1 &>/dev/null;then
+			CC=$1
+			echo "\$CC is $CC"
+		else
+			echo "Could'nt verify $1"\
+			"as valid compiler!"
+			exit 1
+		fi
+
+
+	else
+		if [[ -x /bin/cc ]];then
+			CC=$(readlink -e /bin/cc)
+			echo "\$CC is $CC"
+		else
+			"No $CC supplied!"
+			exit 1
+		fi
+	fi
+}
+
+test_header(){
+	printf "Testing for <${1}.h>..."
+	printf " 	
+	#include <${1}.h> 
+
+	int main(void)
+	{
+		return 0;
+	}
+	" >__config.c
+	
+	if $CC __config.c -o /dev/null 2> /dev/null;then
+		printf "yes\n"
+	else
+		printf "no\n"
+		rm __config.c
+		exit 1
+	fi	
+}
+
+if [[ ! $(uname) == *Linux* ]];then
+	cat <<- "_EOF" 
+	This program uses Linux specifics, such as ioctl(2) for its
+	functionality, so it can't be build on other Unices!
+	_EOF
+	exit 1
+fi
+if [[ $1 == -h ]];then
+	cat <<- "_EOF"
+	Usage:
+		configure [COMPILER]
+		Normally the compiler is determined form the /bin/cc symlink if
+		it doesn't exist, please set the path to your compiler with 
+		[COMPILER].
+	_EOF
+	exit 1
+	#Not reached
+fi
+
+determine_cc "$@"
+for header in $HEADERS;do
+       test_header $header
+done       
+rm __config.c
+cp Makefile.in Makefile
+sed -i -E "s%(CC=).*%\\1${CC}%" Makefile
+cat <<- "_EOF"
+
+	DONE!
+	=======================
+	 You may now run make
+	=======================
+	_EOF
