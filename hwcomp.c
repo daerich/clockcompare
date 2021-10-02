@@ -103,7 +103,7 @@ void clockcomp(enum MODE mode, bool isLocal, bool isVerbose)
 	time_t diff = 0;
 	time_t diff1 = 0;	
 	
-	CATCH((fd = open("/dev/rtc", O_RDONLY)), "Could'nt open file descriptor")
+	CATCH((fd = open("/dev/rtc", O_RDONLY|O_NONBLOCK)), "Could'nt open file descriptor")
 	CATCH(ioctl(fd, RTC_RD_TIME,&times), "Could'nt call ioctl")
 
 	diff = time(NULL);
